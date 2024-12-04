@@ -160,8 +160,51 @@ const searchUsers = async (req, res) => {
 };
 
 
+const updateRSVP = async (req, res) => {
+  try {
+    const { userId } = req.params; // Get the userId from the request parameters
+    const { action } = req.body; // Get the updated action value from the request body
+
+    // Ensure action is valid
+    if (!action || !["pending", "verified"].includes(action)) {
+      return res.status(400).json({
+        message:
+          "Invalid action value. It must be either 'pending' or 'verified'.",
+      });
+    }
+
+    // Find and update the user by their userId
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { action }, // Update the action field
+      { new: true } // Return the updated user document
+    );
+
+    // Check if the user was found and updated
+    if (!updatedUser) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Return the updated user
+    res.status(200).json({
+      message: "User RSVP action updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error in updateRSVP controller:", error);
+    res.status(500).json({
+      message: "Error updating RSVP",
+      error: error.message,
+    });
+  }
+};
+
+
 module.exports = {
   submitRSVP,
   getAllRSVPs,
   searchUsers,
+  updateRSVP
 };

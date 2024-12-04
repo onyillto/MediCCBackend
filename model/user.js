@@ -45,7 +45,11 @@ const userSchema = new mongoose.Schema({
     enum: ["member", "committee"],
     default: "member",
   },
-
+  action: {
+    type: String,
+    enum: ["pending", "verified"],
+    default: "pending",
+  },
 });
 
 // Creating the User model
