@@ -99,170 +99,69 @@ const submitRSVP = async (req, res) => {
     });
   }
 };
-// const submitRSVP = async (req, res) => {
-//   try {
-//     console.log("Request Body:", req.body); // Log the incoming request body
 
-//     const { firstName, lastName, email, phone, plusOne } = req.body;
-//     const firstname = firstName;
-//     const lastname = lastName;
 
-//     // Log plusOne data to check if it's included in the request
-//     console.log("Plus One Data:", plusOne);
-
-//     let plusOneDetails = null;
-//     if (plusOne) {
-//       const {
-//         firstName: plusOneFirstName,
-//         lastName: plusOneLastName,
-//         email: plusOneEmail,
-//         phone: plusOnePhone,
-//       } = plusOne;
-
-//       if (
-//         !plusOneFirstName ||
-//         !plusOneLastName ||
-//         !plusOneEmail ||
-//         !plusOnePhone
-//       ) {
-//         return res.status(400).json({
-//           message:
-//             "Please provide all details for Plus One (First name, Last name, Email, Phone)",
-//         });
-//       }
-
-//       plusOneDetails = {
-//         firstname: plusOneFirstName,
-//         lastname: plusOneLastName,
-//         email: plusOneEmail,
-//         phone: plusOnePhone,
-//       };
-//     }
-
-//     // Create the new User document
-//     const newUser = new User({
-//       firstname,
-//       lastname,
-//       email,
-//       phone,
-//       plusOne: plusOneDetails, // Store the plusOne details if available
-//     });
-
-//     console.log("New User Data:", newUser);
-
-//     // Save the user to the database
-//     await newUser.save();
-
-//     res.status(200).json({
-//       message: "RSVP submitted successfully",
-//       user: newUser,
-//     });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({
-//       message: "Error saving RSVP",
-//       error: error.message,
-//     });
-//   }
-// };
-
-const registerAndFillData = async (req, res, next) => {
+//Get All RSVP
+const getAllRSVPs = async (req, res) => {
   try {
-    const { name, email, password, level, course } = req.body;
+    // Query the database to get all RSVP records
+    const allRSVPs = await User.find(); // Assumes `User` is the model for RSVP data
 
-    // Check if user already exists
-    let user = await User.findOne({ email: email });
-    if (user) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exists",
+    // Check if there are no records
+    if (!allRSVPs || allRSVPs.length === 0) {
+      return res.status(404).json({
+        message: "No RSVP records found",
       });
     }
 
-    // Create new user
-    user = new User({
-      name,
-      email,
-      password,
-      level,
-      course,
-    });
-
-    // Generate JWT token
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
-
-    // Save user to database
-    await user.save();
-
-    // Data object to pass to sendEmail function
-    const emailData = {
-      to: email, // Use 'email' instead of 'userEmail'
-      subject: "Registration Confirmation",
-      text: "Thank you for registering with School Direction Platform.",
-      html: "<p>Thank you for registering with School Direction Platform.</p>",
-    };
-
-    // Send email to user
-    await sendEmail(emailData);
-
-    res.status(201).json({
-      success: true,
-      message: "User registered successfully.",
-      data: {
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          course: user.course,
-          level: user.level,
-          role: user.role,
-          token: token,
-        },
-      },
-    });
-  } catch (error) {
-    console.error(error);
-    next(error);
-  }
-};
-
-// Controller to handle Plus One RSVP submission
-const submitPlusOne = async (req, res) => {
-  try {
-    const { userId, firstname, lastname, email, phone } = req.body;
-
-    // Find the user by ID (ensure the user exists)
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Update the user document with the plus one's details
-    user.plusOne = {
-      firstname,
-      lastname,
-      email,
-      phone,
-    };
-
-    // Save the updated user
-    await user.save();
-
+    // Return the RSVP records as a JSON response
     res.status(200).json({
-      message: "Plus one RSVP submitted successfully",
-      user: user,
+      message: "RSVP records retrieved successfully",
+      data: allRSVPs,
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({
-      message: "Error saving plus one RSVP",
+      message: "Error retrieving RSVP records",
       error: error.message,
     });
   }
 };
+const searchUsers = async (req, res) => {
+  try {
+    console.log("Query Parameters:", req.query);
+
+    const searchCriteria = {};
+    for (const [key, value] of Object.entries(req.query)) {
+      console.log(`Adding search criteria - ${key}: ${value}`);
+      searchCriteria[key] = { $regex: value, $options: "i" };
+    }
+
+    console.log("Final Search Criteria:", searchCriteria);
+
+    const users = await User.find(searchCriteria);
+    console.log("Users Found:", users);
+
+    if (!users || users.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No users found matching the criteria" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Users retrieved successfully", data: users });
+  } catch (error) {
+    console.error("Error in searchUsers controller:", error);
+    res
+      .status(500)
+      .json({ message: "Error searching for users", error: error.message });
+  }
+};
+
 
 module.exports = {
   submitRSVP,
-  submitPlusOne,
+  getAllRSVPs,
+  searchUsers,
 };

@@ -1,11 +1,11 @@
 const express = require("express");
 const route = express.Router();
 const {authMiddleware,isAdmin} = require('../middleware/authMiddleWare')
-const { submitPlusOne, submitRSVP } = require("../controller/user");
+const {  submitRSVP,getAllRSVPs,searchUsers } = require("../controller/user");
 
 
 route.post("/rsvp", submitRSVP);
-
+route.get("/rsvps", getAllRSVPs);
+route.get("/search", searchUsers);
 // POST route for plus one RSVP
-route.post("/rsvp/plus-one", submitPlusOne);
 module.exports = route;
