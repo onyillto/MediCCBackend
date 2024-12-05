@@ -18,6 +18,7 @@
   "description": "gor school job hunt",
   "main": "app.js",
   "scripts": {
+    "start": "node app",
     "dev": "nodemon app.js"
   },
   "author": "",
