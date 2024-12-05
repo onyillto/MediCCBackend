@@ -122,7 +122,7 @@ const sendEmail = asyncHandler(async (data, req, res) => {
         <body>
          <div class="email-container">
   <div class="header">
-    <img src="https://www.caritasuni.edu.ng/assets/images/logo-header-1-116x128.png" alt="Caritas University Header">
+   
   </div>
   
   <div class="content">
