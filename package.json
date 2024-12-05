@@ -17,10 +17,11 @@
   "version": "1.0.0",
   "description": "gor school job hunt",
   "main": "app.js",
-  "scripts": {
-    "start": "node app",
-    "dev": "nodemon app.js"
-  },
+ "scripts": {
+  "dev": "nodemon app.js",                    
+  "start": "NODE_ENV=production node app.js"
+}
+,
   "author": "",
   "license": "ISC",
   "devDependencies": {
